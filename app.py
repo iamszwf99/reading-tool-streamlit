@@ -117,9 +117,6 @@ def extract_rating(feedback_text):
 # UI
 st.title("📚 Reading Tool for Kids")
 
-# UI
-st.title("📚 Reading Tool for Kids")
-
 # Main navigation with better styling
 st.subheader("What would you like to do today?")
 col1, col2 = st.columns(2)
