@@ -119,7 +119,6 @@ st.title("📚 Reading Tool for Kids")
 
 # UI
 st.title("📚 Reading Tool for Kids")
-st.markdown("---")
 
 # Main navigation with better styling
 st.subheader("What would you like to do today?")
@@ -144,10 +143,12 @@ if create_new:
     st.session_state.current_mode = "create_new"
     st.session_state.show_feedback = False
     st.session_state.current_entry = None
+    st.session_state.confirm_delete = False
 
 if view_previous:
     st.session_state.current_mode = "view_previous"
     st.session_state.show_feedback = False
+    st.session_state.confirm_delete = False
 
 entries = load_data()
 
@@ -297,6 +298,32 @@ elif st.session_state.current_mode == "view_previous":
                     st.metric("Focus Area", entry['feedback_type'])
                 
                 st.metric("Date", entry['date'])
+                
+                # Delete entry button with confirmation
+                st.markdown("---")
+                if 'confirm_delete' not in st.session_state:
+                    st.session_state.confirm_delete = False
+                
+                if not st.session_state.confirm_delete:
+                    if st.button("🗑️ Delete This Entry", type="secondary", use_container_width=True):
+                        st.session_state.confirm_delete = True
+                        st.rerun()
+                else:
+                    st.warning("⚠️ Are you sure you want to delete this entry? This cannot be undone.")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅ Yes, Delete", type="primary", use_container_width=True):
+                            # Find and remove the entry
+                            entries_to_keep = [e for e in entries if not (e['date'] == entry['date'] and e['book_title'] == entry['book_title'])]
+                            save_data(entries_to_keep)
+                            st.session_state.confirm_delete = False
+                            st.success("✅ Entry deleted successfully!")
+                            st.session_state.current_mode = None
+                            st.rerun()
+                    with col2:
+                        if st.button("❌ Cancel", use_container_width=True):
+                            st.session_state.confirm_delete = False
+                            st.rerun()
 
             # Plot rating trend
             st.markdown("---")
@@ -346,6 +373,7 @@ if st.session_state.current_mode is not None:
             st.session_state.current_mode = None
             st.session_state.show_feedback = False
             st.session_state.current_entry = None
+            st.session_state.confirm_delete = False
             st.rerun()
 
 # Add sidebar with summary stats
